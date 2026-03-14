@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  # Multi-source app: Helm chart + values file from this Git repo.
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "69.3.1"
+      helm:
+        releaseName: kube-prometheus-stack
+        valueFiles:
+          - $values/values.yaml
+    - repoURL: https://github.com/mmadsen340/madsen-demo-lab-grafana.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # required for kube-prometheus-stack CRDs

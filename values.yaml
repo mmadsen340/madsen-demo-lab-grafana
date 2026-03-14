@@ -1,0 +1,93 @@
+# observability/kube-prometheus-stack/values.yaml
+
+# ---------------------------------------------------------------------------
+# Grafana
+# ---------------------------------------------------------------------------
+grafana:
+  enabled: true
+  adminPassword: "changeme"   # use a sealed secret or external secret in prod
+
+  # Expose via ClusterIP only — Cloudflare Tunnel handles external access
+  service:
+    type: ClusterIP
+    port: 3000
+
+  # Ingress disabled — tunnel routes directly to the service
+  ingress:
+    enabled: false
+
+  grafana.ini:
+    server:
+      root_url: "https://grafana.madsen-demo-lab.com"
+      serve_from_sub_path: false
+
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ---------------------------------------------------------------------------
+# Prometheus
+# ---------------------------------------------------------------------------
+prometheus:
+  enabled: true
+  prometheusSpec:
+    retention: 15d
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 3Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+# ---------------------------------------------------------------------------
+# Alertmanager
+# ---------------------------------------------------------------------------
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+
+# ---------------------------------------------------------------------------
+# Node exporter & kube-state-metrics (enabled by default, keep them on)
+# ---------------------------------------------------------------------------
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+# ---------------------------------------------------------------------------
+# CRD management — let ArgoCD handle via ServerSideApply
+# ---------------------------------------------------------------------------
+crds:
+  enabled: true
