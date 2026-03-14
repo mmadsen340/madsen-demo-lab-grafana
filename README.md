@@ -12,6 +12,8 @@ This repo contains the manifests and Helm values to deploy `kube-prometheus-stac
 
 - A running Kubernetes cluster.
 - Argo CD installed in namespace `argocd`.
+- Traefik ingress controller installed and active.
+- cert-manager installed with a ClusterIssuer (configured as `letsencrypt-prod` in values).
 
 ## 1) Update placeholders
 
@@ -52,5 +54,6 @@ kubectl -n observability get pods
 ## Notes
 
 - This setup keeps Grafana as internal `ClusterIP`.
+- External HTTPS access is provided by Traefik ingress with cert-manager-managed TLS.
 - Prometheus, Alertmanager, and Grafana include PVC-backed persistence.
 - CRDs are managed safely with Argo CD `ServerSideApply=true`.
