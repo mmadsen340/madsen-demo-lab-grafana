@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - argocd-app-kube-prometheus-stack.yaml
+  - postgres-exporter-external.yaml

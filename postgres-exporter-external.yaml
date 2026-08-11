@@ -1,0 +1,32 @@
+# Namespace the exporter "lives" in from the cluster's perspective.
+# Use the same namespace your ServiceMonitor / Prometheus can discover
+# (matches this repo's kube-prometheus-stack Application, deployed into "observability").
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-exporter-external
+  namespace: observability
+  labels:
+    app: postgres-exporter
+    release: kube-prometheus-stack   # match your Prometheus CR's serviceMonitorSelector label
+spec:
+  ports:
+    - name: metrics
+      port: 9187
+      targetPort: 9187
+      protocol: TCP
+  # No selector: this Service is backed by the manual Endpoints object below,
+  # which points at a host outside the cluster.
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: postgres-exporter-external
+  namespace: observability
+subsets:
+  - addresses:
+      - ip: 192.168.86.21
+    ports:
+      - name: metrics
+        port: 9187
+        protocol: TCP
